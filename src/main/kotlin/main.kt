@@ -1,59 +1,64 @@
 fun main(args: Array<String>) {
 
     var appOver = false
-    var appinput: String
+    var appInput: String
     while(!appOver) {
         println("1: New game")
         println("anything else: Quit")
-        appinput = readLine() ?: ""
-        when(appinput) {
+        appInput = readLine() ?: ""
+        when(appInput) {
             "1" -> {
                 var gameInput: String
                 var playerTurnOver = false
-                var isPlayerBust = false
+                var playerBust = false
                 val game = Game()
-                game.player.seeHand()
-                game.computer.showFirstDeal()
+                game.seeFirstDeal()
                 while(!playerTurnOver) {
-                    println("hit: get one more card")
-                    println("anything else: stop at current number")
+                    println("1: hit")
+                    println("anything else: stop")
                     gameInput = readLine() ?: ""
                     when(gameInput) {
-                        "hit" -> {
-                            if (!game.player.hit()) {
-                                game.player.seeHand()
+                        "1" -> {
+                            game.playerHit()
+                            if (game.isPlayerBlackJack()) {
+                                game.seePlayerHand()
+                                println("Player BlackJack!!!")
+                                playerTurnOver = true
+                            }
+                            if (!game.isPlayerBust()) {
+                                game.seePlayerHand()
                             }
                             else {
-                                game.player.seeHand()
+                                game.seePlayerHand()
                                 println("Player bust")
                                 playerTurnOver = true
-                                isPlayerBust = true
+                                playerBust = true
                             }
                         }
                         else -> playerTurnOver = true
                     }
                 }
+
                 println("----------")
-                if(isPlayerBust) {
-                    println("Computer wins!")
+                if (playerBust || game.isPlayerBlackJack()) {
+                    if (playerBust)  {
+                        println("Computer wins!")
+                    }
+                    else println("Game Over")
                 }
                 else {
-                    game.computer.seeHand()
-                    while(game.computer.getHandValue() in 0..17) {
-                        if (!game.computer.hit()) {
-                            game.computer.seeHand()
-                        }
-                        else {
-                            game.computer.seeHand()
-                            println("Computer bust, player wins!")
-                        }
+                    game.seeComputerHand()
+                    while(!game.isComputerDone()) {
+                        game.computerHit()
+                        game.seeComputerHand()
+                        if (game.isComputerBust()) println("Computer bust!")
                     }
                 }
-                if (game.computer.getHandValue() <= 21 && game.computer.getHandValue() >= game.player.getHandValue()) {
+                if (!game.isComputerBust() && game.isComputerWinner()) {
                     println("Computer wins!")
                 }
                 else {
-                    if(!isPlayerBust) println("Player wins")
+                    if(!playerBust) println("Player wins")
                 }
             }
             else -> appOver = true
